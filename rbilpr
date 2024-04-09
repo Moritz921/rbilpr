@@ -1,0 +1,39 @@
+#!/bin/zsh
+
+echo "       _     _ _            "
+echo "      | |   (_) |           "
+echo "  _ __| |__  _| |_ __  _ __ "
+echo " | '__| '_ \| | | '_ \| '__|"
+echo " | |  | |_) | | | |_) | |   "
+echo " |_|  |_.__/|_|_| .__/|_|   "
+echo "                | |         "
+echo "                |_|         "
+echo ""
+echo ""
+
+# list of servers
+servers=("adrastos" "admeta" "aither" "alkmene" "amata" "apate" "ajax" "agylla" "arges" "anaxo" "ares" "atropos" "achilles" "adamas" "alethia" "axylos" "arabia" "acheloos" "aktor" "adanis" "anemoi" "elektra" "eleusius" "eryx" "erebos" "eumolos" "eos" "euros" "eros" "kademos" "kalypso" "kalliste" "kratos" "kreon" "klytios" "kroton" "oikles" "oibalos" "otos" "oidipus" "oxylos" "orestes" "proteus" "priamos" "phoenix" "phobos" "phylla" "pythia" "pandion" "phoebe" "polydora" "polyphem" "penelope" "pegasos" "paris" "pan" "pallas")
+
+# check if at least one file was given
+if [ -z "$@" ]; then
+    echo "Gebe mindestens eine Datei an."
+    exit 1
+fi
+
+# file(s) to copy
+files_to_copy=("$@")
+
+# command which should be executed after copying the file(s)
+post_copy_command="remotelpr ${files_to_copy[@]}"
+
+# iterate over the servers
+for server in "${servers[@]}"; do
+    # try to copy the file(s) to the current server
+    scp "${files_to_copy[@]}" "$server:" && \
+    # if the copy was successful, execute the post copy command
+    ssh -q "$server" "$post_copy_command" && \
+    break
+done
+
+echo "Fertig!"
+exit 0

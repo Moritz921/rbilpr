@@ -1,0 +1,11 @@
+#!/bin/sh
+
+for item in "$@" ;do
+	echo "Es wird nun ""$item"" gedruckt"
+#	lpr -h -o media="a4" -T "RBI ist cool" $item
+        mv $item PDF
+done
+lpq
+/opt/rbi/bin/lpquota
+
+exit 0
