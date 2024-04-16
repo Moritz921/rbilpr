@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 echo "       _     _ _            "
 echo "      | |   (_) |           "
@@ -14,7 +14,7 @@ echo ""
 set -o errexit -o pipefail -o noclobber -o nounset
 
 ! getopt --test > /dev/null
-if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
+if [[ ${pipestatus[1]} -ne 4 ]]; then
     echo "I'm sorry, `getopt --test` failed in this environment."
     exit 1
 fi
@@ -24,7 +24,7 @@ LONGOPTS=single-sided,help
 OPTIONS=sh
 
 ! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
-if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+if [[ ${pipestatus[1]} -ne 0 ]]; then
     exit 2
 fi
 
@@ -47,7 +47,7 @@ while true; do
             break
             ;;
         *)
-            echo "Fehler beim Parsen der Optionen."
+            echo "Error while parsing options."
             exit 3
             ;;
     esac
@@ -63,10 +63,10 @@ if [[ $h == "y" ]]; then
     exit 0
 fi
 
-if [[ $s == "y" ]]; then
-    echo "Single-sided printing is not yet implemented."
-    exit 1
-fi
+# if [[ $s == "y" ]]; then
+#     echo "Single-sided printing is not yet implemented."
+#     exit 1
+# fi
 
 if [[ $# -eq 0 ]]; then
     echo "Please provide at least one file."
@@ -76,20 +76,18 @@ fi
 # list of servers
 servers=("adrastos" "admeta" "aither" "alkmene" "amata" "apate" "ajax" "agylla" "arges" "anaxo" "ares" "atropos" "achilles" "adamas" "alethia" "axylos" "arabia" "acheloos" "aktor" "adanis" "anemoi" "elektra" "eleusius" "eryx" "erebos" "eumolos" "eos" "euros" "eros" "kademos" "kalypso" "kalliste" "kratos" "kreon" "klytios" "kroton" "oikles" "oibalos" "otos" "oidipus" "oxylos" "orestes" "proteus" "priamos" "phoenix" "phobos" "phylla" "pythia" "pandion" "phoebe" "polydora" "polyphem" "penelope" "pegasos" "paris" "pan" "pallas")
 
-# check if at least one file was given
-if [ -z "$@" ]; then
-    echo "Gebe mindestens eine Datei an."
-    exit 1
-fi
-
 # file(s) to copy
 files_to_copy=("$@")
 
 # command which should be executed after copying the file(s)
-post_copy_command="remotelpr ${files_to_copy[@]}"
+post_copy_command="/bin/bash --norc remotelpr ${files_to_copy[@]}"
 
 # iterate over the servers
 for server in "${servers[@]}"; do
+    # if single sided printing is enabled, add the option to the post copy command
+    if [[ $s == "y" ]]; then
+        post_copy_command="$post_copy_command -s"
+    fi
     # try to copy the file(s) to the current server
     scp "${files_to_copy[@]}" "$server:" && \
     # if the copy was successful, execute the post copy command
@@ -99,3 +97,8 @@ done
 
 echo "Done!"
 exit 0
+
+# try to copy the file(s) to the current server
+    scp "${files_to_copy[@]}" "$server:" && \
+    # if the copy was successful, execute the post copy command
+    ssh -q "$server" "$post_copy_command" && \
