@@ -4,12 +4,12 @@ set -o errexit -o pipefail -o noclobber -o nounset
 
 ! getopt --test > /dev/null
 if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
-    echo 'I’m sorry, `getopt --test` failed in this environment.'
+    echo 'I`m sorry, `getopt --test` failed in this environment.'
     exit 1
 fi
 
-LONGOPTS=single-sided
-OPTIONS=s
+LONGOPTS=single-sided,number:,banner
+OPTIONS=sn:b
 
 ! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
@@ -18,12 +18,20 @@ fi
 
 eval set -- "$PARSED"
 
-s=n
+s=n n=1 b=n
 
 while true; do
     case "$1" in
         -s|--single-sided)
             s=y
+            shift
+            ;;
+        -n|--number)
+            n=$2
+            shift 2
+            ;;
+        -b|--banner)
+            b=y
             shift
             ;;
         --)
@@ -40,14 +48,19 @@ done
 echo "Single-sided: $s"
 
 # define print command
-print_cmd="lpr -h -o media='a4' -T 'RBI ist cool'"
+print_cmd="lpr -o media='a4' -T 'RBI ist cool'"
 if [[ $s == "y" ]]; then
     print_cmd="$print_cmd -o sides=one-sided"
+fi
+print_cmd="$print_cmd -# $n"
+if [[ $b == "n" ]]; then
+    print_cmd="$print_cmd -o job-sheets=none"
+else
+    print_cmd="$print_cmd -o job-sheets=standard"
 fi
 
 for item in "$@" ;do
     echo "Es wird nun ""$item"" gedruckt"
-    echo "Druckbefehl: ""$print_cmd"" ""$item"
     $print_cmd $item
     mv $item PDF
 done

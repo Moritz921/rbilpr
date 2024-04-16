@@ -30,3 +30,12 @@ rbilpr example.pdf example2.pdf
 ```
 
 The command (tries to) print all files which are given to it as parameters. After successfull printing it moves the file into a directory called `PDF` on the RBI servers. 
+
+The following flags are available:
+
+| Flag | Description |
+|------|-------------|
+|`-h`/`--help`|Outputs the help message|
+|`-s`/`--single-sided`|Prints on one side of the paper|
+|`-n`/`--number`|Sets the number of copies|
+|`-b`/`--banner`|Prints a banner page (Defaults to no banner page)|
