@@ -48,7 +48,7 @@ fi
 for item in "$@" ;do
     echo "Es wird nun ""$item"" gedruckt"
     echo "Druckbefehl: ""$print_cmd"" ""$item"
-    # $print_cmd $item
+    $print_cmd $item
     mv $item PDF
 done
 lpq
