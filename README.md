@@ -15,6 +15,12 @@ This command uses aliases for the rbi Servers. To add them to your ssh config fi
 ./populateSSHconfig.sh s1234567
 ```
 
+There also is a setup script called `setup.sh` which does al steps mentioned above. If you haven't sent your ssh-key to the rbi servers, it will ask for your password multiple times.
+
+### Dependencies
+
+This command depends on `gnu-getopt`. In most Linux systems it is preinstalled, in macOS it can be installed with `brew install gnu-getopt` or `brew install util-linux`. Make sure that it is symlinked correctly. 
+
 ## Usage
 
 After installation, you *should* be able to print on your local machine using the `rbilpr` command:

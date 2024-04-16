@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 echo "       _     _ _            "
 echo "      | |   (_) |           "
@@ -10,6 +10,68 @@ echo "                | |         "
 echo "                |_|         "
 echo ""
 echo ""
+
+set -o errexit -o pipefail -o noclobber -o nounset
+
+! getopt --test > /dev/null
+if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
+    echo "I'm sorry, `getopt --test` failed in this environment."
+    exit 1
+fi
+
+# options
+LONGOPTS=single-sided,help
+OPTIONS=sh
+
+! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
+if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+    exit 2
+fi
+
+eval set -- "$PARSED"
+
+s=n h=n
+
+while true; do
+    case "$1" in
+        -s|--single-sided)
+            s=y
+            shift
+            ;;
+        -h|--help)
+            h=y
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Fehler beim Parsen der Optionen."
+            exit 3
+            ;;
+    esac
+done
+
+if [[ $h == "y" ]]; then
+    echo "Usage: remotelpr [OPTION]... FILE..."
+    echo "Copy FILE(s) to a remote server and print it."
+    echo ""
+    echo "Options:"
+    echo "  -s, --single-sided  print single-sided"
+    echo "  -h, --help          display this help and exit"
+    exit 0
+fi
+
+if [[ $s == "y" ]]; then
+    echo "Single-sided printing is not yet implemented."
+    exit 1
+fi
+
+if [[ $# -eq 0 ]]; then
+    echo "Please provide at least one file."
+    exit 1
+fi
 
 # list of servers
 servers=("adrastos" "admeta" "aither" "alkmene" "amata" "apate" "ajax" "agylla" "arges" "anaxo" "ares" "atropos" "achilles" "adamas" "alethia" "axylos" "arabia" "acheloos" "aktor" "adanis" "anemoi" "elektra" "eleusius" "eryx" "erebos" "eumolos" "eos" "euros" "eros" "kademos" "kalypso" "kalliste" "kratos" "kreon" "klytios" "kroton" "oikles" "oibalos" "otos" "oidipus" "oxylos" "orestes" "proteus" "priamos" "phoenix" "phobos" "phylla" "pythia" "pandion" "phoebe" "polydora" "polyphem" "penelope" "pegasos" "paris" "pan" "pallas")
@@ -35,5 +97,5 @@ for server in "${servers[@]}"; do
     break
 done
 
-echo "Fertig!"
+echo "Done!"
 exit 0
