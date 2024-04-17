@@ -48,20 +48,21 @@ done
 echo "Single-sided: $s"
 
 # define print command
-print_cmd="lpr -o media='a4' -T 'RBI ist cool'"
+print_flags=""
 if [[ $s == "y" ]]; then
-    print_cmd="$print_cmd -o sides=one-sided"
+    print_flags="$print_flags -o sides=one-sided"
 fi
-print_cmd="$print_cmd -# $n"
+print_cmd="$print_flags -# $n"
 if [[ $b == "n" ]]; then
-    print_cmd="$print_cmd -o job-sheets=none"
+    print_cmd="$print_flags -o job-sheets=none"
 else
-    print_cmd="$print_cmd -o job-sheets=standard"
+    print_cmd="$print_flags -o job-sheets=standard"
 fi
 
 for item in "$@" ;do
     echo "Es wird nun ""$item"" gedruckt"
-    $print_cmd $item
+    # echo "lpr -o media='a4' -T 'RBI ist cool'$print_flags $item"
+    lpr -o media='a4' -T 'RBI ist cool'$print_flags $item
     mv $item PDF
 done
 lpq
