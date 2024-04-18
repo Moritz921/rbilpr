@@ -1,7 +1,8 @@
 #!/bin/zsh
 
-if [-z "$@" ]; then
-    echo "Please provide your username"
+# check if username is provided
+if [ -z "$1" ]; then
+    echo "No username provided. Exiting..."
     exit 1
 fi
 
@@ -25,7 +26,26 @@ if [ ! -f "setupRBI.sh" ]; then
     exit 1
 fi
 
-echo "Warning: you will be prompted for your rbi password multiple times. For more convenience, you can use ssh keys."
+echo "Do you want to copy your ssh key to rbi servers for passwordless login? (y/n)"
+while true; do
+    read answer
+    if [ "$answer" = "y" ]; then
+        ssh-copy-id rbi
+        break
+    elif [ "$answer" = "n" ]; then
+        break
+    else
+        echo "Please enter y or n"
+    fi
+done
+
+if [ "$answer" = "y" ]; then
+    if [ ! -f "~/.ssh/id_rsa.pub" ]; then
+        echo "No ssh key found. Please generate one using ssh-keygen"
+        exit 1
+    fi
+    ssh-copy-id $username@adrastos.rbi.cs.uni-frankfurt.de
+fi
 
 # ssh part
 echo "Adding ssh config for rbi servers"

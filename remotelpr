@@ -48,7 +48,7 @@ done
 echo "Single-sided: $s"
 
 # define print command
-print_flags=""
+print_flags="-o media='a4' -T 'RBI ist cool'"
 if [[ $s == "y" ]]; then
     print_flags="$print_flags -o sides=one-sided"
 fi
@@ -62,7 +62,7 @@ fi
 for item in "$@" ;do
     echo "Es wird nun ""$item"" gedruckt"
     # echo "lpr -o media='a4' -T 'RBI ist cool'$print_flags $item"
-    lpr -o media='a4' -T 'RBI ist cool'$print_flags $item
+    lpr $print_flags $item
     mv $item PDF
 done
 lpq

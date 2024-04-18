@@ -12,9 +12,15 @@ if [ -z "$user" ]; then
 fi
 
 # Check if SSH config file exists, if not create it
-filename="./config"
+filename="$HOME/.ssh/config"
 if [ ! -f "$filename" ]; then
   touch "$filename"
+fi
+
+# check if header exists in SSH config file
+if grep -q "# --- RBI SSH Config ---" "$filename"; then
+  echo "RBI SSH Config already exists in $filename"
+  exit 0
 fi
 
 # Write the PCs to the SSH config file
@@ -25,9 +31,15 @@ echo "    HostName adamas.rbi.cs.uni-frankfurt.de" >> "$filename"
 echo "    User $user" >> "$filename"
 echo "" >> "$filename"
 for pc in "${pc_list[@]}"; do
-  echo "Host $pc" >> "$filename"
-  echo "    HostName $pc.rbi.cs.uni-frankfurt.de" >> "$filename"
-  echo "    User $user" >> "$filename"
-  echo "" >> "$filename"
+  if grep -q "Host $pc" "$filename"; then
+    continue
+  else
+    echo "Host $pc" >> "$filename"
+    echo "    HostName $pc.rbi.cs.uni-frankfurt.de" >> "$filename"
+    echo "    User $user" >> "$filename"
+    echo "" >> "$filename"
+  fi
 done
 echo "# --- End of RBI SSH Config ---" >> "$filename"
+
+exit 0
