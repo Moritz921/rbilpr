@@ -2,7 +2,19 @@
 
 This repository implements a local command `rbilpr` to print on the servers of the RBI in the Goethe University Frankfurt. 
 
-## Installation
+## Installation and Update
+
+### Automatic
+
+To install or update the script, simply use the provided `setup.sh` script. The working directory doesn't matter, as the script will copy the files to the correct location, but the files `rbilpr`, `remotelpr`, `populateSSHconfig.sh` and `setupRBI.sh` need to be present in the same directory. You will be asked before changes are made. If you accept, the `rbilpr` script will be pasted to `~/.local/bin`.
+
+To use the setup script, run the script with your username as an argument:
+
+```bash
+./setup.sh s1234567
+```
+
+### Manuel
 
 The file `rbilpr` needs to be in PATH (Tip: in most Linux/Unix Systems the directory `~/.local/bin` is already in `$PATH`). 
 On the RBI side, the file `remotelpr` needs to be in its PATH and a directory called `PDF` must be created in your home directory. Caution: it doesnt't work if the file is in `~/bin`!
@@ -14,8 +26,6 @@ This command uses aliases for the rbi Servers. To add them to your ssh config fi
 ```bash
 ./populateSSHconfig.sh s1234567
 ```
-
-There also is a setup script called `setup.sh` which does al steps mentioned above. If you haven't sent your ssh-key to the rbi servers, it will ask for your password multiple times.
 
 ### Dependencies
 
