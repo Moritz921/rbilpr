@@ -85,31 +85,24 @@ servers=("adrastos" "admeta" "aither" "alkmene" "amata" "apate" "ajax" "agylla" 
 files_to_copy=("$@")
 
 # command which should be executed after copying the file(s)
-post_copy_command="/bin/bash --norc remotelpr"
+post_copy_flags=""
 # add the single-sided option to the post copy command
 if [[ $s == "y" ]]; then
-    post_copy_command="$post_copy_command -s"
+    post_copy_flags="$post_copy_flags -s"
 fi
-post_copy_command="$post_copy_command -n $number"
+post_copy_flags="$post_copy_flags -n $number"
 if [[ $b == "y" ]]; then
-    post_copy_command="$post_copy_command -b"
+    post_copy_flags="$post_copy_flags -b"
 fi
-
-post_copy_command="$post_copy_command ${files_to_copy[@]}"
 
 # iterate over the servers
 for server in "${servers[@]}"; do
     # try to copy the file(s) to the current server
     scp "${files_to_copy[@]}" "$server:" && \
     # if the copy was successful, execute the post copy command
-    ssh -q "$server" "$post_copy_command" && \
+    ssh -q "$server" "/bin/bash --norc remotelpr $post_copy_flags ${files_to_copy[@]}" && \
     break
 done
 
 echo "Done!"
 exit 0
-
-# try to copy the file(s) to the current server
-    scp "${files_to_copy[@]}" "$server:" && \
-    # if the copy was successful, execute the post copy command
-    ssh -q "$server" "$post_copy_command" && \

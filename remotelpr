@@ -62,7 +62,7 @@ fi
 for item in "$@" ;do
     echo "Es wird nun ""$item"" gedruckt"
     # echo "lpr -o media='a4' -T 'RBI ist cool'$print_flags $item"
-    lpr $print_flags $item
+    lpr "$print_flags" "$item"
     mv $item PDF
 done
 lpq
