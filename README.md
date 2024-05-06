@@ -45,7 +45,8 @@ The following flags are available:
 
 | Flag | Description |
 |------|-------------|
-|`-h`/`--help`|Outputs the help message|
-|`-s`/`--single-sided`|Prints on one side of the paper|
-|`-n`/`--number`|Sets the number of copies|
 |`-b`/`--banner`|Prints a banner page (Defaults to no banner page)|
+|`-f`/`--forms`|Prints files without removing form fields|
+|`-n`/`--number`|Sets the number of copies|
+|`-s`/`--single-sided`|Prints on one side of the paper|
+|`-h`/`--help`|Outputs the help message|
