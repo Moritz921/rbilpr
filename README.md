@@ -14,7 +14,7 @@ To use the setup script, run the script with your username as an argument:
 ./setup.sh s1234567
 ```
 
-### Manuel
+### Manually
 
 The file `rbilpr` needs to be in PATH (Tip: in most Linux/Unix Systems the directory `~/.local/bin` is already in `$PATH`). 
 On the RBI side, the file `remotelpr` needs to be in its PATH and a directory called `PDF` must be created in your home directory. Caution: it doesnt't work if the file is in `~/bin`!
@@ -26,6 +26,8 @@ This command uses aliases for the rbi Servers. To add them to your ssh config fi
 ```bash
 ./populateSSHconfig.sh s1234567
 ```
+
+To add autocompletions for zsh, past the file `_rbilpr` into a directory in your `$fpath`, i.e. `~/.oh-my-zsh/completions` and restart your shell.
 
 ### Dependencies
 

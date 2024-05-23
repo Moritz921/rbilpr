@@ -1,0 +1,15 @@
+#compdef rbilpr
+
+_rbilpr() {
+  local state
+
+  _arguments \
+    '-b[print banner page]' \
+    '-f[print forms else flatten document before printing]' \
+    '-n[number of pages]:number of pages' \
+    '-s[single sided]' \
+    '-h[print help message]' \
+    '1:thing:_path_files -g "*.pdf"'
+}
+
+_rbilpr "$@"
