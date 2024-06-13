@@ -7,6 +7,7 @@ if [ -z "$1" ]; then
 fi
 
 username=$1
+hostname="adrastos.rbi.cs.uni-frankfurt.de"
 
 # check if rbilpr, remotelpr and populateSSHconfig.sh file exists
 if [ ! -f "rbilpr" ]; then
@@ -44,7 +45,7 @@ if [ "$answer" = "y" ]; then
         echo "No ssh key found. Please generate one using ssh-keygen"
         exit 1
     fi
-    ssh-copy-id "$(username)@adrastos.rbi.cs.uni-frankfurt.de"
+    ssh-copy-id $username@$hostname
 fi
 
 # ssh part
