@@ -41,7 +41,7 @@ while true; do
 done
 
 if [ "$answer" = "y" ]; then
-    if [ ! -f "~/.ssh/id_rsa.pub" ]; then
+    if [ ! -f "$HOME/.ssh/id_rsa.pub" ]; then
         echo "No ssh key found. Please generate one using ssh-keygen"
         exit 1
     fi
