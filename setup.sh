@@ -44,7 +44,7 @@ if [ "$answer" = "y" ]; then
         echo "No ssh key found. Please generate one using ssh-keygen"
         exit 1
     fi
-    ssh-copy-id $username@adrastos.rbi.cs.uni-frankfurt.de
+    ssh-copy-id "$(username)@adrastos.rbi.cs.uni-frankfurt.de"
 fi
 
 # ssh part
@@ -100,4 +100,3 @@ fi
 fi
 
 exit 0
-tixe
