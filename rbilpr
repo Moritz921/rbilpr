@@ -13,59 +13,12 @@ echo ""
 
 set -o errexit -o pipefail -o noclobber -o nounset
 
-! getopt --test > /dev/null
-if [[ ${pipestatus[1]} -ne 4 ]]; then
-    echo 'I`m sorry, `getopt --test` failed in this environment.'
+error_exit() {
+    echo "$1"
     exit 1
-fi
+}
 
-# options
-LONGOPTS=single-sided,help,number:,banner,forms
-OPTIONS=shn:bf
-
-! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
-if [[ ${pipestatus[1]} -ne 0 ]]; then
-    exit 2
-fi
-
-eval set -- "$PARSED"
-
-s=n h=n number=1 b=n f=n
-
-while true; do
-    case "$1" in
-        -b|--banner)
-            b=y
-            shift
-            ;;
-        -f|--forms)
-            f=y
-            shift
-            ;;
-        -n|--number)
-            number="$2"
-            shift 2
-            ;;
-        -s|--single-sided)
-            s=y
-            shift
-            ;;
-        -h|--help)
-            h=y
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            echo "Error while parsing options."
-            exit 3
-            ;;
-    esac
-done
-
-if [[ $h == "y" ]]; then
+print_usage() {
     echo "Usage: remotelpr [OPTION]... FILE..."
     echo "Copy FILE(s) to a remote server and print it."
     echo ""
@@ -75,60 +28,137 @@ if [[ $h == "y" ]]; then
     echo "  -n, --number        specify the number of copies"
     echo "  -s, --single-sided  print single-sided"
     echo "  -h, --help          display this help and exit"
-    exit 0
-fi
+}
 
-if [[ $# -eq 0 ]]; then
-    echo "Please provide at least one file."
-    exit 1
-fi
+parse_options() {
+    ! getopt --test > /dev/null
+    if [[ ${pipestatus[1]} -ne 4 ]]; then
+        error_exit 'I`m sorry, `getopt --test` failed in this environment.'
+    fi
 
-# list of servers
-servers=("adrastos" "admeta" "aither" "alkmene" "amata" "apate" "ajax" "agylla" "arges" "anaxo" "ares" "atropos" "achilles" "adamas" "alethia" "axylos" "arabia" "acheloos" "aktor" "adanis" "anemoi" "elektra" "eleusius" "eryx" "erebos" "eumolos" "eos" "euros" "eros" "kademos" "kalypso" "kalliste" "kratos" "kreon" "klytios" "kroton" "oikles" "oibalos" "otos" "oidipus" "oxylos" "orestes" "proteus" "priamos" "phoenix" "phobos" "phylla" "pythia" "pandion" "phoebe" "polydora" "polyphem" "penelope" "pegasos" "paris" "pan" "pallas")
+    LONGOPTS=single-sided,help,number:,banner,forms
+    OPTIONS=shn:bf
 
+    ! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
+    if [[ ${pipestatus[1]} -ne 0 ]]; then
+        exit 2
+    fi
 
-files_to_copy_flattened=()
-# check if pdftk is installed
-if command -v pdftk &> /dev/null && [[ $f == "n" ]]; then
-    for file in "$@"; do
-        new_file="${file:r}.flattened.pdf"
-        pdftk "$file" output "$new_file" flatten
-        files_to_copy_flattened+=("$new_file")
+    eval set -- "$PARSED"
+
+    s=n h=n number=1 b=n f=n
+
+    while true; do
+        case "$1" in
+            -b|--banner)
+                b=y
+                shift
+                ;;
+            -f|--forms)
+                f=y
+                shift
+                ;;
+            -n|--number)
+                number="$2"
+                shift 2
+                ;;
+            -s|--single-sided)
+                s=y
+                shift
+                ;;
+            -h|--help)
+                h=y
+                shift
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "Error while parsing options."
+                exit 3
+                ;;
+        esac
     done
-fi
 
-# create list of files to copy
-if [[ ${#files_to_copy_flattened[@]} -eq 0 ]]; then
-    files_to_copy=("$@")
-else
-    files_to_copy=("${files_to_copy_flattened[@]}")
-fi
+    if [[ $h == "y" ]]; then
+        print_usage
+        exit 0
+    fi
 
-# flags for remotelpr command
-post_copy_flags=""
-if [[ $s == "y" ]]; then
-    post_copy_flags="$post_copy_flags -s"
-fi
-post_copy_flags="$post_copy_flags -n $number"
-if [[ $b == "y" ]]; then
-    post_copy_flags="$post_copy_flags -b"
-fi
+    if [[ $# -eq 0 ]]; then
+        error_exit "Please provide at least one file."
+    fi
+}
 
-# iterate over the servers
-for server in "${servers[@]}"; do
-    # try to copy the file(s) to the current server
-    scp "${files_to_copy[@]}" "$server:" && \
-    # if the copy was successful, execute the post copy command
-    ssh -q "$server" "/bin/bash --norc remotelpr $post_copy_flags ${files_to_copy[@]}" && \
-    break
-done
+load_servers() {
+    CONFIG_DIR="$HOME/.config/rbilpr"
+    SERVERS_CONF="$CONFIG_DIR/servers.conf"
+    echo "Looking for servers.conf in $CONFIG_DIR"
 
-# if pdfs were flattened, remove the flattened files
-if command -v pdftk &> /dev/null && [[ $f == "n" ]]; then
-    for file in "${files_to_copy_flattened[@]}"; do
-        rm "$file"
+    if [[ -f "$SERVERS_CONF" ]]; then
+        servers=()
+        while IFS= read -r line; do
+            servers+=("$line")
+        done < "$SERVERS_CONF"
+    else
+        echo "No servers.conf found. Using default servers."
+        servers=("adrastos" "admeta" "aither" "alkmene" "amata" "apate" "ajax" "agylla" "arges" "anaxo" "ares" "atropos" "achilles" "adamas" "alethia" "axylos" "arabia" "acheloos" "aktor" "adanis" "anemoi")
+    fi
+}
+
+flatten_files() {
+    files_to_copy_flattened=()
+    if command -v pdftk &> /dev/null && [[ $f == "y" ]]; then
+        for file in "$@"; do
+            new_file="${file:r}.flattened.pdf"
+            pdftk "$file" output "$new_file" flatten
+            files_to_copy_flattened+=("$new_file")
+        done
+    fi
+
+    if [[ ${#files_to_copy_flattened[@]} -eq 0 ]]; then
+        files_to_copy=("$@")
+    else
+        files_to_copy=("${files_to_copy_flattened[@]}")
+    fi
+}
+
+generate_post_copy_flags() {
+    post_copy_flags=""
+    if [[ $s == "y" ]]; then
+        post_copy_flags="$post_copy_flags -s"
+    fi
+    post_copy_flags="$post_copy_flags -n $number"
+    if [[ $b == "y" ]]; then
+        post_copy_flags="$post_copy_flags -b"
+    fi
+}
+
+copy_and_execute() {
+    for server in "${servers[@]}"; do
+        scp "${files_to_copy[@]}" "$server:" && \
+        ssh -q "$server" "/bin/bash --norc remotelpr $post_copy_flags ${files_to_copy[@]}" && \
+        break
     done
-fi
+}
 
-echo "Done!"
-exit 0
+cleanup_flattened_files() {
+    if command -v pdftk &> /dev/null && [[ $f == "y" ]]; then
+        for file in "${files_to_copy_flattened[@]}"; do
+            rm "$file"
+        done
+    fi
+}
+
+main() {
+    parse_options "$@"
+    load_servers
+    flatten_files "$@"
+    generate_post_copy_flags
+    copy_and_execute
+    cleanup_flattened_files
+    echo "Done!"
+}
+
+main "$@"
